@@ -2,16 +2,6 @@
   "crons": [
     { "path": "/api/cron/overdue", "schedule": "0 0 * * *" }
   ],
-  "functions": {
-    "index.py": {
-      "excludeFiles": [
-        "tests/**",
-        "docs/**",
-        "node_modules/**",
-        "scripts/**"
-      ]
-    }
-  },
   "headers": [
     {
       "source": "/static/(.*)",
