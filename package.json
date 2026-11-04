@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./public/static/src.css -o ./public/static/app.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.1.1",
+    "echarts": "^6.1.0"
+  }
+}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Risk register · Risk Sentinel{% endblock %}
+{% block content %}
+<div class="risk-register">
+  <div class="page-heading risk-page-heading">
+    <div>
+      <div class="eyebrow">Risk intelligence</div>
+      <h1>Risk register</h1>
+      <p class="muted">Prioritize exposure, treatment, and accountability in one view.</p>
+    </div>
+    <div class="toolbar">
+      <a class="button secondary" href="{{ url_for('analytics.risk_report') }}">Download report</a>
+      {% if current_user.role in ["admin", "risk_owner"] %}<a class="button" href="{{ url_for('risks.add_risk') }}">＋ Add risk</a>{% endif %}
+    </div>
+  </div>
+
+  <div class="kpi-grid risk-kpis">
+    <div class="card kpi"><div class="kpi-label">Total risks</div><div class="kpi-value">{{ total }}</div></div>
+    <div class="card kpi"><div class="kpi-label">Appetite threshold</div><div class="kpi-value">{{ threshold }}</div></div>
+    <div class="card kpi"><div class="kpi-label">Page</div><div class="kpi-value">{{ page }} <span class="muted">/ {{ pages }}</span></div></div>
+    <div class="card kpi"><div class="kpi-label">Review focus</div><div class="kpi-value compact">Residual</div></div>
+  </div>
+
+  <section class="card risk-content">
+    <div class="card-body">
+      <div class="section-heading">
+        <div><div class="eyebrow">Register</div><h2>All risks</h2></div>
+        <span class="muted">{{ total }} total</span>
+      </div>
+      <form class="risk-filter-bar" method="get">
+        <input name="search" aria-label="Search risks" placeholder="Search title or threat..." value="{{ request.args.get('search', '') }}">
+        <select name="status" aria-label="Filter by status"><option value="">All statuses</option>{% for value in ["Open", "In Treatment", "Closed"] %}<option value="{{ value }}" {% if request.args.get('status') == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+        <select name="level" aria-label="Filter by severity"><option value="">All severities</option>{% for value in ["Low", "Medium", "High", "Critical"] %}<option value="{{ value }}" {% if request.args.get('level') == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+        <button class="button" type="submit">Filter</button>
+      </form>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Risk</th><th>Status</th><th>Inherent</th><th>Residual</th><th>Owner</th><th></th></tr></thead>
+          <tbody>
+          {% for risk in risks %}
+          <tr><td><a href="{{ url_for('risks.detail_risk', risk_id=risk.id) }}"><strong>{{ risk.title }}</strong></a><br><span class="muted">{{ risk.source }}</span></td><td>{{ risk.status }}</td><td><span class="badge {{ risk.inherent_level|lower }}">{{ risk.inherent_score }} · {{ risk.inherent_level }}</span></td><td><span class="badge {{ risk.residual_level|lower }}">{{ risk.residual_score }} · {{ risk.residual_level }}</span>{% if risk.residual_score > threshold %}<br><span class="muted">⚠ Appetite breach</span>{% endif %}</td><td>{{ risk.owner }}</td><td>{% if current_user.role in ["admin", "risk_owner"] %}<a href="{{ url_for('risks.edit_risk', risk_id=risk.id) }}">Edit</a>{% else %}<span class="muted">Read only</span>{% endif %}</td></tr>
+          {% else %}<tr><td colspan="6"><div class="empty"><h3>No risks found</h3><p class="muted">Adjust your filters or add a new risk.</p></div></td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="toolbar toolbar-end">
+        {% if page > 1 %}<a class="button secondary" href="{{ url_for('risks.list_risks_view', page=page-1, search=request.args.get('search'), status=request.args.get('status'), level=request.args.get('level')) }}">Previous</a>{% endif %}
+        {% if page < pages %}<a class="button secondary" href="{{ url_for('risks.list_risks_view', page=page+1, search=request.args.get('search'), status=request.args.get('status'), level=request.args.get('level')) }}">Next</a>{% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
